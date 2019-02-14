@@ -1,0 +1,4 @@
+cabal install
+sudo ./dist/.../NKClient &
+sudo ./dist/.../NKServer &
+echo "message" | netcat localhost 4242
