@@ -2,6 +2,7 @@ module Main where
  
 import Network.Socket
 import qualified Network.Socket.ByteString as B (recv) 
+import System.Process
 
 -- The server listens on a socket for client requests to scp
 main :: IO ()
@@ -29,4 +30,5 @@ runConn :: (Socket, SockAddr) -> IO ()
 runConn (sock, _) = do
     mountTarget <- B.recv sock 10
     print ("got request to send to: "++(show mountTarget))
+    system "scp /home/mark/test.txt mark@127.0.0.1:/home/mark/test2.txt"
     close sock
