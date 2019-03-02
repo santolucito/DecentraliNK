@@ -1,3 +1,6 @@
+sudo mkdir -p -m0755 /var/run/sshd
+sudo /usr/sbin/sshd
+
 cabal install
 sudo ./dist/.../NKClient &
 sudo ./dist/.../NKServer &
