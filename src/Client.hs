@@ -38,6 +38,7 @@ runConn (sock, _) = do
 -- request a scp action from server to copy directly to the mounted usb device
 requestServer :: ByteString -> IO()
 requestServer mountTarget = do
+    print "sending request to server"
     addr:_ <- getAddrInfo 
                 (Just defaultHints {addrSocketType = Stream }) 
                 (Just "127.0.0.1") 
