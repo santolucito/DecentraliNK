@@ -3,6 +3,9 @@ module Main where
 import Network.Socket
 import qualified Network.Socket.ByteString as B (recv) 
 import System.Process
+import System.Exit
+
+maxAttempts = 3
 
 -- The server listens on a socket for client requests to scp
 main :: IO ()
@@ -21,14 +24,27 @@ main = do
 -- this can be simulated by running 'echo "message" | netcat localhost 4242'
 listenForClientReq :: Socket -> IO ()
 listenForClientReq sock = do
-    conn <- accept sock     -- accept a connection and handle it
-    runConn conn            -- run our server's logic
+    conn <- accept sock      -- accept a connection and handle it
+    runConn (fst conn) 0           -- run our server's logic
     listenForClientReq sock  -- repeat
  
 --extract the mountTarget from the usb mount and pass along
-runConn :: (Socket, SockAddr) -> IO ()
-runConn (sock, _) = do
-    mountTarget <- B.recv sock 10
-    print ("got request to send to: "++(show mountTarget))
-    system "scp /home/mark/test.txt mark@127.0.0.1:/home/mark/test2.txt"
-    close sock
+runConn :: Socket -> Int -> IO ()
+runConn sock attempts =
+    if attempts == maxAttempts
+    then do
+      mountTarget <- B.recv sock 10
+      print ("got request to send to: "++(show mountTarget))
+      scpExitCode <- system "scp /home/mark/test.txt mark@127.0.0.1:/home/mark/test2.txt"
+      case scpExitCode of
+        -- 0: Success
+        ExitSuccess -> return ()
+        -- 1: Undetermined error in file copy
+        ExitFailure 1 -> return ()
+        -- 2: Destination is not directory, but it should be
+        ExitFailure 2 -> return ()
+        -- 3: Connecting to host failed
+        ExitFailure 3 -> runConn sock (attempts+1)
+      close sock
+    else
+      close sock
