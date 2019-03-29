@@ -1,7 +1,36 @@
-sudo mkdir -p -m0755 /var/run/sshd
-sudo /usr/sbin/sshd
+# DecentraliNK
 
-cabal install
-sudo ./dist/.../NKClient &
-sudo ./dist/.../NKServer &
-echo "message" | netcat localhost 4242
+This is the code that handles the communication between client and server.
+The eventual workflow should be:
+
+when a SD card is plugged into the client, a menu pops up allowing the user to select a file on the touchscreen that they want to download (tv shows, today's news, etc).
+The server then sends that file directly to the SD device, and we are all set!
+
+## Local Testing
+
+To test locally, we need a ssh server running that accepts connections on port 22.
+The exact way to set up a ssh server will depend on your environment
+
+    sudo mkdir -p -m0755 /var/run/sshd
+    sudo /usr/sbin/sshd
+
+Once you have the ssh server up (for scp'ing the file), install
+
+    cabal sandbox init
+    cabal install
+
+Then run the client and server...
+
+    echo <password> | sudo -S ./dist/.../NKClient &
+    echo <password> | sudo -S ./dist/.../NKServer &
+
+and then simulate a usb device being plugged in
+
+    echo "message" | netcat localhost 4242
+
+## Building for Raspberry Pi
+
+The Raspberry Pi uses armv7 architecture, while any reasonable dev machine is x86.
+We could try cross-compilation, but its just easier to build directly on a raspberry pi.
+To do this, we have an SD card with a raspi image that is only used for ghc compiliation and has an internet connection setup. 
+We build on that image, then copy the static binaries to a usb, then pull the binaries off the usb and onto the deployment raspis.
