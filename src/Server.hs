@@ -39,7 +39,7 @@ runConn (sock,addr) attempts =
       mountTarget <- B.recv sock 10
       print ("got request to send to: "++(show mountTarget))
       print $ getIp addr
-      scpExitCode <- system $ "scp /home/mark/test.txt mark@"++ getIp addr ++":/home/mark/test2.txt"
+      scpExitCode <- system $ "scp -i nkcert /home/mark/test.txt mark@"++ getIp addr ++":/home/mark/test2.txt"
       case scpExitCode of
         -- 0: Success
         ExitSuccess -> return ()
